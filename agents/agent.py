@@ -3,6 +3,7 @@ from agents.actor import Actor
 from agents.critic import Critic
 
 import numpy as np
+import copy
 
 import random
 from collections import namedtuple, deque
@@ -33,7 +34,8 @@ class ReplayBuffer:
     def __len__(self):
         """Return the current size of internal memory."""
         return len(self.memory)
-    
+
+
 #具有所需特性的特定噪点流程。根据高斯分布生成随机样本。
 #这是为了向动作中添加噪点，促进探索行为。但是因为动作是应用到飞行器上的力和扭矩，所以连续动作不能变化太大。
 #项目的设定还是挺好的，但是我真的很不习惯项目中给出的参考代码，对函数参数完全没有说明……可能是故意强迫去看论文？？
@@ -49,7 +51,7 @@ class OUNoise:
 
     def reset(self):
         """Reset the internal state (= noise) to mean (mu)."""
-        self.state = self.mu
+        self.state = copy.copy(self.mu)
 
     def sample(self):
         """Update internal state and return it as a noise sample."""
@@ -109,7 +111,7 @@ class DDPG():
 
         # Learn, if enough samples are available in memory 如果已经存储了足够的部署
         if len(self.memory) > self.batch_size:
-            experiences = self.memory.sample() #随机取出部分经验
+            experiences = self.memory.sample() #随机取出部分经验,进行学习
             self.learn(experiences)
 
         # Roll over last state and action

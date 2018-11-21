@@ -31,19 +31,17 @@ class Actor:
         states = layers.Input(shape=(self.state_size,), name='states')
 
         # Add hidden layers
-        #net = layers.Dense(units=32, activation='relu')(states)
-        #net = layers.Dense(units=64, activation='relu')(net)
-        #net = layers.Dense(units=32, activation='relu')(net)
+        net = layers.Dense(units=32, activation='relu')(states)
+        net = layers.Dense(units=64, activation='relu')(net)
+        net = layers.Dense(units=32, activation='relu')(net)
         # 添加中间层，
         
-        net = layers.Dense(units=400,kernel_regularizer=layers.regularizers.l2(1e-6))(states)
-        net = layers.BatchNormalization()(net)
-        net = layers.Activation("relu")(net)
-        
-        net = layers.Dense(units=300,kernel_regularizer=layers.regularizers.l2(1e-6))(net)
-        
-        net = layers.BatchNormalization()(net)
-        net = layers.Activation("relu")(net)
+        #net = layers.Dense(units=400,kernel_regularizer=layers.regularizers.l2(1e-6))(states)
+        #net = layers.BatchNormalization()(net)
+        #net = layers.Activation("relu")(net)
+        #net = layers.Dense(units=300,kernel_regularizer=layers.regularizers.l2(1e-6))(net)
+        #net = layers.BatchNormalization()(net)
+        #net = layers.Activation("relu")(net)
         
         # Try different layer sizes, activations, add batch normalization, regularizers, etc.
         # 这里全部使用Dense 和 relu有点不太符合深度学习的建议，全连接层，提取特征和泛化
@@ -52,7 +50,7 @@ class Actor:
 
         # Add final output layer with sigmoid activation 最后的输出层要使用sigmoid激活函数
         raw_actions = layers.Dense(units=self.action_size, activation='sigmoid', name='raw_actions',
-                                  kernel_initializer=layers.initializers.RandomUniform(minval=-0.003, maxval=0.003))(net)
+                                  kernel_initializer=layers.initializers.RandomUniform(minval=-0.01, maxval=0.01))(net)
 
         # Scale [0, 1] output for each action dimension to proper range
         # 输出层生成的原始动作，位于[0.0, 1.0]范围之内(因为使用了sigmoid激活函数)。

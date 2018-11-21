@@ -45,7 +45,6 @@ class FlyTask():
         #惩罚欧拉和速度改变
         euler_change = sigmoid(sum(abs(old_angular_v - self.sim.angular_v)))
         velocity_change = sigmoid(sum(abs(old_v - self.sim.v)))
-        
         reward = 1. - dis_from_target - 0.02* euler_change - 0.02* velocity_change
         return reward
     
