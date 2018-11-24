@@ -27,25 +27,21 @@ class Critic:
         actions = layers.Input(shape=(self.action_size,), name='actions')
 
         # Add hidden layer(s) for state pathway 添加状态模型路径，和Actor保持一致。
-        net_states = layers.Dense(units=32, activation='relu')(states)
-        net_states = layers.Dense(units=64, activation='relu')(net_states)
-        #net_states = layers.Dense(units=400,kernel_regularizer=layers.regularizers.l2(1e-6))(states)
-        #net_states = layers.BatchNormalization()(net_states)
-        #net_states = layers.Activation("relu")(net_states)
-        #net_states = layers.Dense(units=300, kernel_regularizer=layers.regularizers.l2(1e-6))(net_states)
+        net_states = layers.Dense(units=256)(states)
+        net_states = layers.BatchNormalization()(net_states)
+        net_states = layers.Activation("relu")(net_states)
+        
+        net_states = layers.Dense(units=512)(net_states)
 
         # Add hidden layer(s) for action pathway
-        net_actions = layers.Dense(units=32, activation='relu')(actions)
-        net_actions = layers.Dense(units=64, activation='relu')(net_actions)
-
-        #net_actions = layers.Dense(units=300,kernel_regularizer=layers.regularizers.l2(1e-6))(actions)
-        #net_actions = layers.BatchNormalization()(net_actions)
-        #net_actions = layers.Activation("relu")(net_actions)
-        #net_actions = layers.Dense(units=300, kernel_regularizer=layers.regularizers.l2(1e-6))(net_actions)
+        net_actions = layers.Dense(units=256)(actions)
+        net_actions = layers.BatchNormalization()(net_actions)
+        net_actions = layers.Activation("relu")(net_actions)
+        
+        net_actions = layers.Dense(units=512)(net_actions)
 
         # Try different layer sizes, activations, add batch normalization, regularizers, etc.
         # 尝试在这里添加更多层级，改变layer size,添加激活层，batchnormalization层，
-
         # Combine state and action pathways 这两个层级先通过单独的路径（mini network）处理。
         # 下面将两个层级通过add结合到了一起。
         net = layers.Add()([net_states, net_actions])
@@ -60,7 +56,7 @@ class Critic:
         self.model = models.Model(inputs=[states, actions], outputs=Q_values)
 
         # Define optimizer and compile model for training with built-in loss function
-        optimizer = optimizers.Adam(lr=0.001)
+        optimizer = optimizers.Adam()
         self.model.compile(optimizer=optimizer, loss='mse')
 
         # Compute action gradients (derivative of Q values w.r.t. to actions)

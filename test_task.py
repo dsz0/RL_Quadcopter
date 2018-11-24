@@ -20,8 +20,7 @@ class FlyTask():
         # Simulation
         self.sim = PhysicsSim(init_pose, init_velocities, init_angle_velocities, runtime) 
         #task.sim.pose 飞行器Quadcopter的位置及欧拉角状态，可以体现一边翻跟斗一边飞？？欧拉角的变化应该尽量小稳定
-        #task.sim.v   飞行器Quadcopter位置的变化速度
-        #task.sim.angular_v  飞行器的角速度，也就是飞行器自身变换的速度。
+        #task.sim.v   飞行器Quadcopter位置的变化速度  #task.sim.angular_v  飞行器的角速度，也就是飞行器自身变换的速度。
         self.action_repeat = 3
 
         self.state_size = self.action_repeat * 6
@@ -36,7 +35,13 @@ class FlyTask():
 
     def get_reward(self):
         """Uses current pose of sim to return reward."""
-        reward = np.tanh(1 - 0.003*(abs(self.sim.pose[:3] - self.target_pos))).sum()
+        reward = 1.- 0.003*(abs(self.sim.pose[:3]-self.target_pos)).sum()
+        #reward = np.tanh(1.-.03*(abs(self.sim.pose[:3] - self.target_pos))).sum()       
+        #上面的设计设计其实是对陷入了一个必须反馈值为正的怪圈，其实反馈值为负，对于我们这个设定更加方便。反正速度越大，偏差越大，分数就越低
+        #z_diff = abs(self.target_pos[2] - self.sim.pose[2])
+        #z_vel = self.sim.v[2]
+        #xy_dist = np.sqrt(((self.target_pos[:2] - self.sim.pose[:2])**2).sum())
+        #reward = -5.0*z_diff - 2.0*abs(z_vel) - xy_dist
         return reward
     
     def get_reward_ex(self, old_angular_v, old_v):
@@ -53,16 +58,12 @@ class FlyTask():
         reward = 0
         pose_all = []
         for _ in range(self.action_repeat):
-            old_pose = self.sim.pose
-            old_angular_v = self.sim.angular_v
-            old_v = self.sim.v
-            
             done = self.sim.next_timestep(rotor_speeds) # update the sim pose and velocities
-            #reward += self.get_reward()
-            reward += self.get_reward_ex(old_angular_v, old_v)
+            reward += self.get_reward()
             pose_all.append(self.sim.pose)
-            #if done : 这个done还有可能是飞行器飞出范围？所以这里对于这个done不进行奖励。
-            #   reward += 10
+            #这个done还有可能是飞行器飞出范围？所以这里对于这个done不进行奖励。
+            #if done:
+            #    reward += 10
         next_state = np.concatenate(pose_all)
         return next_state, reward, done
 

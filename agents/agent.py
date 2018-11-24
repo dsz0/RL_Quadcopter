@@ -26,6 +26,7 @@ class ReplayBuffer:
         """Add a new experience to memory."""
         e = self.experience(state, action, reward, next_state, done)
         self.memory.append(e)
+        
     #随机的取出一批过去的经验（所谓的经验调用）
     def sample(self, batch_size=64):
         """Randomly sample a batch of experiences from memory."""
@@ -51,7 +52,7 @@ class OUNoise:
 
     def reset(self):
         """Reset the internal state (= noise) to mean (mu)."""
-        self.state = copy.copy(self.mu)
+        self.state = copy.copy(self.mu) #按照论坛提示，进行修正
 
     def sample(self):
         """Update internal state and return it as a noise sample."""
