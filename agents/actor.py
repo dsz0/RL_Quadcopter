@@ -32,13 +32,18 @@ class Actor:
         states = layers.Input(shape=(self.state_size,), name='states')
         
         # Add hidden layers        # 添加中间层，
-        net = layers.Dense(units=256)(states)
-        net = layers.BatchNormalization()(net)
+        net = layers.Dense(units=128)(states)
+        #net = layers.BatchNormalization()(net)
         net = layers.Activation("relu")(net)
         
-        net = layers.Dense(units=512)(net)
-        net = layers.BatchNormalization()(net)
+        net = layers.Dense(units=256)(net)
+        #net = layers.BatchNormalization()(net)
         net = layers.Activation("relu")(net)
+        
+        net = layers.Dense(units=128)(states)
+        #net = layers.BatchNormalization()(net)
+        net = layers.Activation("relu")(net)
+
         
         # Try different layer sizes, activations, add batch normalization, regularizers, etc.
         # 这里全部使用Dense 和 relu有点不太符合深度学习的建议，全连接层，提取特征和泛化
@@ -58,14 +63,15 @@ class Actor:
         # Create Keras model
         self.model = models.Model(inputs=states, outputs=actions)
         # Define loss function using action value (Q value) gradients 定义损失函数loss, 使用了动作值的梯度.
-        #shape 是一个尺寸元组(整数),不包含批量大小。 not including the batch size. shape=(32,) 表明期望的输入是按批次的32维向量。batch_shape 包含批量大小的元组。batch_shape=(10, 32) 表明期望的输入是 10 个 32 维向量。batch_shape=(None, 32) 表明任意批次大小的 32 维向量。
+        #shape 是一个尺寸元组(整数),不包含批量大小。 not including the batch size. shape=(32,) 表明期望的输入是按批次的32维向量。
+        #batch_shape 包含批量大小的元组。batch_shape=(10, 32) 表明期望的输入是 10 个 32 维向量。batch_shape=(None, 32) 表明任意批次大小的 32 维向量。
         action_gradients = layers.Input(shape=(self.action_size,))
         loss = K.mean(-action_gradients * actions)
 
         # Incorporate any additional losses here (e.g. from regularizers)
 
         # Define optimizer and training function 定义好优化器和训练函数。
-        optimizer = optimizers.Adam()
+        optimizer = optimizers.Adam(lr=0.0001)
         updates_op = optimizer.get_updates(params=self.model.trainable_weights, loss=loss)
         self.train_fn = K.function(
             inputs=[self.model.input, action_gradients, K.learning_phase()],

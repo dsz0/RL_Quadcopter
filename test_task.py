@@ -24,8 +24,10 @@ class FlyTask():
         self.action_repeat = 3
 
         self.state_size = self.action_repeat * 6
-        self.action_low = 0
-        self.action_high = 900
+        #self.action_low = 0  #减少动作范围。但是我对动作范围还是不太熟悉。
+        #self.action_high = 900
+        self.action_low = 300
+        self.action_high = 600
         self.action_size = 4
 
         # Goal
