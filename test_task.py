@@ -37,14 +37,17 @@ class FlyTask():
 
     def get_reward(self):
         """Uses current pose of sim to return reward."""
-        reward = 1.- 0.003*(abs(self.sim.pose[:3]-self.target_pos)).sum()
-        #reward = np.tanh(1.-.03*(abs(self.sim.pose[:3] - self.target_pos))).sum()       
+        #下面这个奖励 函数是审核员的最新指导，不过这个基本上就是强化了对z轴变化的奖励，基本上是强行指导向上飞，感觉对于更普遍的任务没有什么帮助。
+        #reward = 1.- 0.003*(abs(self.sim.pose[:3]-self.target_pos)).sum()
+        reward = np.tanh(1.-.03*(abs(self.sim.pose[:3] - self.target_pos))).sum()
+        return reward
+        
+        #reward = 2*self.sim.pose[2] +0.2
         #上面的设计设计其实是对陷入了一个必须反馈值为正的怪圈，其实反馈值为负，对于我们这个设定更加方便。反正速度越大，偏差越大，分数就越低
         #z_diff = abs(self.target_pos[2] - self.sim.pose[2])
         #z_vel = self.sim.v[2]
         #xy_dist = np.sqrt(((self.target_pos[:2] - self.sim.pose[:2])**2).sum())
         #reward = -5.0*z_diff - 2.0*abs(z_vel) - xy_dist
-        return reward
     
     def get_reward_ex(self, old_angular_v, old_v):
         dis_from_target = sigmoid(sum(abs(self.sim.pose[:3] - self.target_pos))/3)
@@ -63,9 +66,6 @@ class FlyTask():
             done = self.sim.next_timestep(rotor_speeds) # update the sim pose and velocities
             reward += self.get_reward()
             pose_all.append(self.sim.pose)
-            #这个done还有可能是飞行器飞出范围？所以这里对于这个done不进行奖励。
-            #if done:
-            #    reward += 10
         next_state = np.concatenate(pose_all)
         return next_state, reward, done
 

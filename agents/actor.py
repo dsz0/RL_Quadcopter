@@ -28,23 +28,15 @@ class Actor:
     def build_model(self):
         """Build an actor (policy) network that maps states -> actions."""
         # Define input layer (states)建立策略模型，状态映射动作的模型。
-        # 首先定义输入，也就是环境状态，这个状态的计量维度，由数字表现
+        # 首先定义输入，也就是环境状态，这个状态的计量维度，由数字state_size表现
         states = layers.Input(shape=(self.state_size,), name='states')
         
         # Add hidden layers        # 添加中间层，
-        net = layers.Dense(units=128)(states)
+        net = layers.Dense(units=128, activation='relu')(states)
+        net = layers.Dense(units=256, activation='relu')(net)
         #net = layers.BatchNormalization()(net)
-        net = layers.Activation("relu")(net)
-        
-        net = layers.Dense(units=256)(net)
-        #net = layers.BatchNormalization()(net)
-        net = layers.Activation("relu")(net)
-        
-        net = layers.Dense(units=128)(states)
-        #net = layers.BatchNormalization()(net)
-        net = layers.Activation("relu")(net)
+        #net = layers.Activation("relu")(net)
 
-        
         # Try different layer sizes, activations, add batch normalization, regularizers, etc.
         # 这里全部使用Dense 和 relu有点不太符合深度学习的建议，全连接层，提取特征和泛化
         # 在多层深度学习中添加BatchNormalization层，将前一层激活值重新规范化，

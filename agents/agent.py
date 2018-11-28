@@ -49,10 +49,11 @@ class OUNoise:
         self.theta = theta
         self.sigma = sigma
         self.reset()
-
+        
     def reset(self):
         """Reset the internal state (= noise) to mean (mu)."""
         self.state = copy.copy(self.mu) #按照论坛提示，进行修正
+        #self.state=self.mu
 
     def sample(self):
         """Update internal state and return it as a noise sample."""
@@ -88,7 +89,7 @@ class DDPG():
         # Noise process 噪音处理流程 ，均值，
         self.exploration_mu = 0
         self.exploration_theta = 0.15
-        self.exploration_sigma = 0.2
+        self.exploration_sigma = 0.3
         self.noise = OUNoise(self.action_size, self.exploration_mu, self.exploration_theta, self.exploration_sigma)
 
         # Replay memory 
@@ -98,7 +99,7 @@ class DDPG():
         
         # Algorithm parameters 衰减，或者说未来折扣率。
         self.gamma = 0.99  # discount factor
-        self.tau = 0.01  # for soft update of target parameters 最后进行软更新，由参数tau控制。
+        self.tau = 0.001  # for soft update of target parameters 最后进行软更新，由参数tau控制。
 
     def reset_episode(self):
         self.noise.reset()

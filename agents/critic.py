@@ -26,16 +26,12 @@ class Critic:
         actions = layers.Input(shape=(self.action_size,), name='actions')
 
         # Add hidden layer(s) for state pathway 添加状态模型路径，和Actor保持一致。
-        net_states = layers.Dense(units=128)(states)
-        #net_states = layers.BatchNormalization()(net_states)
-        net_states = layers.Activation("relu")(net_states)
-        net_states = layers.Dense(units=256)(net_states)
+        net_states = layers.Dense(units=128, activation='relu')(states)
+        net_states = layers.Dense(units=256, activation='relu')(net_states)
 
         # Add hidden layer(s) for action pathway
-        net_actions = layers.Dense(units=128)(actions)
-        #net_actions = layers.BatchNormalization()(net_actions)
-        net_actions = layers.Activation("relu")(net_actions)
-        net_actions = layers.Dense(units=256)(net_actions)
+        net_actions = layers.Dense(units=128, activation='relu')(actions)
+        net_actions = layers.Dense(units=256, activation='relu')(net_actions)
 
         # Try different layer sizes, activations, add batch normalization, regularizers, etc.
         # 尝试在这里添加更多层级，改变layer size,添加激活层，batchnormalization层，
@@ -45,8 +41,10 @@ class Critic:
         net = layers.Activation('relu')(net)
 
         # Add more layers to the combined network if needed
+        #行动者模型的重点是将状态映射到动作。
+        #评论者模型要将 状态，动作 映射到它们的Q值。
 
-        # Add final output layer to prduce action values (Q values)
+        # Add final output layer to prduce action values (Q values) 
         Q_values = layers.Dense(units=1, name='q_values')(net)
 
         # Create Keras model
@@ -57,13 +55,12 @@ class Critic:
         self.model.compile(optimizer=optimizer, loss='mse')
 
         # Compute action gradients (derivative of Q values w.r.t. to actions)
-        #最终输出，任何给定（状态，动作）对的Q值。我们还需要计算此Q值对于相应动作向量的梯度。
+        #最终输出，任何给定的（状态，动作）对的Q值。我们还需要计算此Q值对于相应动作向量的梯度。
         #梯度用于训练行动者模型。这一步需要单独执行，定义了get_action_gradients来访问这些梯度。
         action_gradients = K.gradients(Q_values, actions)
 
         # Define an additional function to fetch action gradients (to be used by actor model)
         self.get_action_gradients = K.function(
             inputs=[*self.model.input, K.learning_phase()],
-            outputs=action_gradients)
-        
+            outputs=action_gradients)        
         
